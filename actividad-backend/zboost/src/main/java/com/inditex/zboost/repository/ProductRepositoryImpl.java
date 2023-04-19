@@ -5,6 +5,7 @@ import com.inditex.zboost.entity.ProductOrderItem;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.util.*;
 
 @Repository
@@ -23,7 +24,8 @@ public class ProductRepositoryImpl extends BaseRepository<Product> implements Pr
         /**
          * TODO: EXERCISE 1.a) Retrieve the different categories of available products.
          */
-        String sql = """
+        String sql = """ 
+                    SELECT DISTINCT CATEGORY FROM PRODUCTS
                 """;
 
         return this.queryForList(sql, Map.of());
@@ -53,8 +55,11 @@ public class ProductRepositoryImpl extends BaseRepository<Product> implements Pr
          * Example: Use of SQL function upper().
          */
         Map<String, Object> params = new HashMap<>();
+        params.put("categories", categories);
+        params.put("categoriesIsEmpty", categories.isEmpty());
 
         String sql = """
+                    SELECT * FROM PRODUCT WHERE CATEGORY IN :categories OR :categoriesIsEmpty
                 """;
 
         return this.query(sql, params, Product.class);
@@ -66,6 +71,8 @@ public class ProductRepositoryImpl extends BaseRepository<Product> implements Pr
         /*
          * TODO: EXERCISE 2.b) Retrieve the details of an order given its ID
          */
+
+
         return List.of();
     }
 

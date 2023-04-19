@@ -1,16 +1,15 @@
 package com.inditex.zboost.repository;
 
+import ch.qos.logback.core.joran.sanity.Pair;
 import com.inditex.zboost.entity.Order;
 import com.inditex.zboost.entity.OrderDetail;
+import com.inditex.zboost.entity.ProductOrderItem;
 import com.inditex.zboost.exception.NotFoundException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class OrderRepositoryImpl extends BaseRepository<Order> implements OrderRepository {
@@ -26,7 +25,14 @@ public class OrderRepositoryImpl extends BaseRepository<Order> implements OrderR
          * TODO: EXERCISE 2.a) Retrieve a list of the last N orders (remember to sort by
          * date)
          */
-        return List.of();
+
+        String sql =
+                """
+                        SELECT * FROM ORDERS ORDER BY DATE
+                        """
+                ;
+
+        return this.query(sql, Map.of(), Order.class).subList(0, limit);
     }
 
     @Override
@@ -55,6 +61,18 @@ public class OrderRepositoryImpl extends BaseRepository<Order> implements OrderR
          * you can use the exception {@link
          * com.inditex.zboost.exception.NotFoundException}
          */
-        return new OrderDetail();
+
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("orderId", orderId);
+
+
+
+        String sql =
+                """
+                        SELECT o.id, o.date, o.status, p.price * oi.quantity, sum(oi.quantity) FROM ORDERS o, ORDER_ITEMS oi, PRODUCTS p
+                        WHERE oi.ORDER_ID = :orderId AND o.id == oi.order_id AND oi.product_id == p.id
+                        """;
+
+        return this.queryForObject(sql, params, OrderDetail.class);
     }
 }
